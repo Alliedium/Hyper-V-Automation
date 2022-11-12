@@ -203,9 +203,11 @@ Returns the path for downloaded file.
 ### New-VMFromUbuntuImage (*)
 
 ```powershell
-New-VMFromUbuntuImage.ps1 -SourcePath <string> -VMName <string> -RootPassword <string> [-FQDN <string>] [-VHDXSizeBytes <uint64>] [-MemoryStartupBytes <long>] [-EnableDynamicMemory] [-ProcessorCount <long>] [-SwitchName <string>] [-MacAddress <string>] [-IPAddress <string>] [-Gateway <string>] [-DnsAddresses <string[]>] [-InterfaceName <string>] [-VlanId <string>] [-SecondarySwitchName <string>] [-SecondaryMacAddress <string>] [-SecondaryIPAddress <string>] [-SecondaryInterfaceName <string>] [-SecondaryVlanId <string>] [-InstallDocker] [<CommonParameters>]
+New-VMFromUbuntuImage.ps1 -SourcePath <string> -VMName <string> -UserName <string> -UserPassword <string> [-FQDN <string>] [-VHDXSizeBytes <uint64>] [-MemoryStartupBytes <long>] [-EnableDynamicMemory] [-ProcessorCount <long>] [-SwitchName <string>] [-MacAddress <string>] [-IPAddress <string>] [-Gateway <string>] [-DnsAddresses <string[]>] [-InterfaceName <string>] [-VlanId <string>] [-SecondarySwitchName <string>] [-SecondaryMacAddress <string>] [-SecondaryIPAddress <string>] [-SecondaryInterfaceName <string>] [-SecondaryVlanId <string>] [-InstallDocker] [<CommonParameters>]
 
-New-VMFromUbuntuImage.ps1 -SourcePath <string> -VMName <string> -RootPublicKey <string> [-FQDN <string>] [-VHDXSizeBytes <uint64>] [-MemoryStartupBytes <long>] [-EnableDynamicMemory] [-ProcessorCount <long>] [-SwitchName <string>] [-MacAddress <string>] [-IPAddress <string>] [-Gateway <string>] [-DnsAddresses <string[]>] [-InterfaceName <string>] [-VlanId <string>] [-SecondarySwitchName <string>] [-SecondaryMacAddress <string>] [-SecondaryIPAddress <string>] [-SecondaryInterfaceName <string>] [-SecondaryVlanId <string>] [-InstallDocker] [<CommonParameters>]
+New-VMFromUbuntuImage.ps1 -SourcePath <string> -VMName <string> -UserName <string> -UserPublicKey <string> [-FQDN <string>] [-VHDXSizeBytes <uint64>] [-MemoryStartupBytes <long>] [-EnableDynamicMemory] [-ProcessorCount <long>] [-SwitchName <string>] [-MacAddress <string>] [-IPAddress <string>] [-Gateway <string>] [-DnsAddresses <string[]>] [-InterfaceName <string>] [-VlanId <string>] [-SecondarySwitchName <string>] [-SecondaryMacAddress <string>] [-SecondaryIPAddress <string>] [-SecondaryInterfaceName <string>] [-SecondaryVlanId <string>] [-InstallDocker] [<CommonParameters>]
+
+New-VMFromUbuntuImage.ps1 -SourcePath <string> -VMName <string> -UserName <string> -UserPassword <string> -UserPublicKey <string> [-FQDN <string>] [-VHDXSizeBytes <uint64>] [-MemoryStartupBytes <long>] [-EnableDynamicMemory] [-ProcessorCount <long>] [-SwitchName <string>] [-MacAddress <string>] [-IPAddress <string>] [-Gateway <string>] [-DnsAddresses <string[]>] [-InterfaceName <string>] [-VlanId <string>] [-SecondarySwitchName <string>] [-SecondaryMacAddress <string>] [-SecondaryIPAddress <string>] [-SecondaryInterfaceName <string>] [-SecondaryVlanId <string>] [-InstallDocker] [<CommonParameters>]
 ```
 
 Creates a Ubuntu VM from Ubuntu Cloud image.
@@ -218,7 +220,7 @@ choco install qemu-img -y
 
 You can download Ubuntu cloud images from [here](https://cloud-images.ubuntu.com/releases/focal/release/) (get the `amd64.img` version). Or just use [`Get-UbuntuImage.ps1`](#Get-UbuntuImage).
 
-You must use `-RootPassword` to set a password or `-RootPublicKey` to set a public key for default `ubuntu` user.
+You must use `-UserName` along with `-UserPassword` to set a password or `-UserPublicKey` to set a public key (or both of them) for user which name determined in `-UserName`.
 
 You may configure network using `-VlanId`, `-IPAddress`, `-Gateway` and `-DnsAddresses` options. `-IPAddress` must be in `address/prefix` format. If not specified the network will be configured via DHCP.
 
@@ -241,9 +243,10 @@ Returns the `VirtualMachine` created.
 $imgFile = .\Get-UbuntuImage.ps1 -Verbose
 $vmName = 'TstUbuntu'
 $fqdn = 'test.example.com'
-$rootPublicKey = Get-Content "$env:USERPROFILE\.ssh\id_rsa.pub"
+$userName = 'ubuntu'
+$userPublicKey = Get-Content "$env:USERPROFILE\.ssh\id_rsa.pub"
 
-.\New-VMFromUbuntuImage.ps1 -SourcePath $imgFile -VMName $vmName -FQDN $fqdn -RootPublicKey $rootPublicKey -VHDXSizeBytes 60GB -MemoryStartupBytes 2GB -ProcessorCount 2 -IPAddress 10.10.1.196/16 -Gateway 10.10.1.250 -DnsAddresses '8.8.8.8','8.8.4.4' -Verbose
+.\New-VMFromUbuntuImage.ps1 -SourcePath $imgFile -VMName $vmName -FQDN $fqdn -UserName $userName -UserPublicKey $userPublicKey -VHDXSizeBytes 60GB -MemoryStartupBytes 2GB -ProcessorCount 2 -IPAddress 10.10.1.196/16 -Gateway 10.10.1.250 -DnsAddresses '8.8.8.8','8.8.4.4' -Verbose
 
 # Your public key is installed. This should not ask you for a password.
 ssh ubuntu@10.10.1.196

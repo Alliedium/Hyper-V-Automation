@@ -18,11 +18,12 @@ param(
 
     [string]$FQDN = $VMName,
 
-    [Parameter(Mandatory=$true, ParameterSetName='RootPassword')]
-    [string]$RootPassword,
+    [Parameter(Mandatory=$true)]
+    [string]$UserName,
 
-    [Parameter(Mandatory=$true, ParameterSetName='RootPublicKey')]
-    [string]$RootPublicKey,
+    [string]$UserPassword,
+
+    [string]$UserPublicKey,
 
     [uint64]$VHDXSizeBytes,
 
@@ -63,8 +64,6 @@ param(
 
     [string]$VlanId,
 
-    [Parameter(Mandatory=$false, ParameterSetName='RootPassword')]
-    [Parameter(Mandatory=$false, ParameterSetName='RootPublicKey')]
     [string]$SecondarySwitchName,
 
     [ValidateScript({
@@ -223,16 +222,49 @@ runcmd:
  - 'update-grub'     # fix "error: no such device: root." -- https://bit.ly/2TBEdjl
 '@
 
-if ($RootPassword) {
-    $sectionPasswd = @"
-password: $RootPassword
-chpasswd: { expire: False }
-ssh_pwauth: True
+if (($UserPublicKey) -and ($UserPassword)) {
+    $sectionUsers = @"
+ssh_pwauth: False
+users:
+  - name: $UserName
+    groups:
+      - adm
+      - staff
+      - sudo
+    homedir: /home/$UserName
+    lock_passwd: false
+    passwd: $UserPassword
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - $UserPublicKey
 "@
-} elseif ($RootPublicKey) {
-    $sectionPasswd = @"
-ssh_authorized_keys:
-  - $RootPublicKey
+} elseif ($UserPassword) {
+    $sectionUsers = @"
+ssh_pwauth: True
+users:
+  - name: $UserName
+    groups:
+      - adm
+      - staff
+      - sudo
+    homedir: /home/$UserName
+    lock_passwd: false
+    passwd: $UserPassword
+    shell: /bin/bash
+"@
+} elseif ($UserPublicKey) {
+    $sectionUsers = @"
+ssh_pwauth: False
+users:
+  - name: $UserName
+    groups:
+      - adm
+      - staff
+      - sudo
+    homedir: /home/$UserName
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - $UserPublicKey
 "@
 }
 
@@ -254,7 +286,7 @@ $userdata = @"
 hostname: $FQDN
 fqdn: $FQDN
 
-$sectionPasswd
+$sectionUsers
 $sectionWriteFiles
 $sectionRunCmd
 
