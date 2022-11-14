@@ -231,6 +231,7 @@ users:
       - adm
       - staff
       - sudo
+    sudo: ALL=(ALL) NOPASSWD:ALL
     homedir: /home/$UserName
     lock_passwd: false
     passwd: $UserPassword
@@ -247,6 +248,7 @@ users:
       - adm
       - staff
       - sudo
+    sudo: ALL=(ALL) NOPASSWD:ALL
     homedir: /home/$UserName
     lock_passwd: false
     passwd: $UserPassword
@@ -261,6 +263,7 @@ users:
       - adm
       - staff
       - sudo
+    sudo: ALL=(ALL) NOPASSWD:ALL
     homedir: /home/$UserName
     shell: /bin/bash
     ssh_authorized_keys:
